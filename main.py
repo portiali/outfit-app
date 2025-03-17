@@ -143,9 +143,6 @@ def get_or_create_user(baseurl):
            
 
 
-
-
-
     except Exception as e:
         print("**ERROR")
         print("**ERROR: invalid input")
