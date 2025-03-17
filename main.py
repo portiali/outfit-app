@@ -60,6 +60,11 @@ class Data:
     self.season = row[6]
     self.usage = row[7]
 
+class User:
+   def __init__(self, row):
+      self.userid = row[0]
+      self.username = row[1]
+
 ###################################################################
 #
 # web_service_get
@@ -121,14 +126,23 @@ def web_service_get(url):
     return None
 ############################################################
 #
-# prompt
+# get_or_create_user
 #
 
-def prompt():
+def get_or_create_user(baseurl):
     try: 
-        print()
-        print("")
         
+        username = input("Enter your username: ")
+        api = "/users"
+        url = baseurl + api
+        res = web_service_get(url)
+
+
+        if username in users:
+           
+
+
+
 
 
     except Exception as e:
@@ -146,56 +160,61 @@ def prompt():
 #
 
 try:
-  print('** Welcome to Pick-a-Fit! **')
-  print()
+    print('** Welcome to Pick-a-Fit! **\n')
+    print("Let's get you started.\n")
+    print()
 
-  # eliminate traceback so we just get error message:
-  sys.tracebacklimit = 0
+    # eliminate traceback so we just get error message:
+    sys.tracebacklimit = 0
 
-  #
-  # what config file should we use for this session?
-  #
-  config_file = 'outfitapp-client-config.ini'
+    #
+    # what config file should we use for this session?
+    #
+    config_file = 'outfitapp-client-config.ini'
 
-  #
-  # setup base URL to web service:
-  #
-  configur = ConfigParser()
-  configur.read(config_file)
-  baseurl = configur.get('client', 'webservice')
+    #
+    # setup base URL to web service:
+    #
+    configur = ConfigParser()
+    configur.read(config_file)
+    baseurl = configur.get('client', 'webservice')
 
-  #
-  # make sure baseurl does not end with /, if so remove:
-  #
-  if len(baseurl) < 16:
-    print("**ERROR: baseurl '", baseurl, "' is not nearly long enough...")
+    #
+    # make sure baseurl does not end with /, if so remove:
+    #
+    if len(baseurl) < 16:
+        print("**ERROR: baseurl '", baseurl, "' is not nearly long enough...")
+        sys.exit(0)
+
+    if baseurl.startswith("http:"):
+        print("**ERROR: your URL starts with 'http', it should start with 'https'")
+        sys.exit(0)
+
+    lastchar = baseurl[len(baseurl) - 1]
+    if lastchar == "/":
+        baseurl = baseurl[:-1]
+    
+
+
+    #get user's username 
+    username = get_or_create_user(baseurl)    
+
+
+    #
+    # main processing loop:
+    #
+
+
+
+
+    #
+    # done
+    #
+    print()
+    print('** done **')
     sys.exit(0)
-
-  if baseurl.startswith("http:"):
-    print("**ERROR: your URL starts with 'http', it should start with 'https'")
-    sys.exit(0)
-
-  lastchar = baseurl[len(baseurl) - 1]
-  if lastchar == "/":
-    baseurl = baseurl[:-1]
-
-  #
-  # main processing loop:
-  #
-
-
-
-
-
-
-  #
-  # done
-  #
-  print()
-  print('** done **')
-  sys.exit(0)
 
 except Exception as e:
-  logging.error("**ERROR: main() failed:")
-  logging.error(e)
-  sys.exit(0)
+    logging.error("**ERROR: main() failed:")
+    logging.error(e)
+    sys.exit(0)
