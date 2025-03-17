@@ -139,6 +139,7 @@ def get_or_create_user(baseurl):
 
 
         if username in users:
+           print('hihih')
            
 
 
