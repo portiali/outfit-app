@@ -129,19 +129,20 @@ def web_service_get(url):
 # get_or_create_user
 #
 
-def get_or_create_user(baseurl):
+def get_or_create_user(baseurl, usernames):
     try: 
         
+        # /usernames is called in main and passed in here as a list
         username = input("Enter your username: ")
-        api = "/users"
-        url = baseurl + api
-        res = web_service_get(url)
 
+        if username in usernames:
+           print('Welcome back {username}! Your user ID is {userid}')
+        else:
+           # add new user to DB
+           # query for userid
+           print('Hi, {username}: Your new user ID is {userid}')
 
-        if username in users:
-           print('hihih')
            
-
 
     except Exception as e:
         print("**ERROR")
@@ -192,10 +193,16 @@ try:
     if lastchar == "/":
         baseurl = baseurl[:-1]
     
+    # CALL TO API /usernames to retrieve all usernames
+    user_url = baseurl + "/usernames"
+    response = requests.get(user_url)
+
+    # FIX: convert response into list of usernames
+    usernames = response
 
 
     #get user's username 
-    username = get_or_create_user(baseurl)    
+    username = get_or_create_user(baseurl, usernames)    
 
 
     #
