@@ -129,21 +129,30 @@ def web_service_get(url):
 # get_or_create_user
 #
 
-def get_or_create_user(baseurl, usernames):
+def get_or_create_user(baseurl):
     try: 
         
         # /usernames is called in main and passed in here as a list
         username = input("Enter your username: ")
         api = "/users"
-        url = baseurl + api + f"?username={username}"
-        res = requests.get(url)
+        url = baseurl + api
+
+        # prepare the data to send as JSON in POST body
+        data = {
+           "username": username
+        }
+
+
+        #POST req to add new user if they don't exist 
+        # and to retrieve data of user if they do
+        res = requests.get(url, json=data)
         
         if res.status_code == 200:
            body = res.json()
            message = body['message']
            print(message)
            return body['user_id']
-        elif res.status_code = 500:
+        elif res.status_code == 500:
            body = res.json()
            message = body['message']
            print(message)
@@ -201,28 +210,14 @@ try:
     lastchar = baseurl[len(baseurl) - 1]
     if lastchar == "/":
         baseurl = baseurl[:-1]
-    
-    # CALL TO API /usernames to retrieve all usernames
-    user_url = baseurl + "/usernames"
-    response = requests.get(user_url)
 
-    # FIX: convert response into list of usernames
-    usernames = response
-
-
-    #get user's username 
-    user_id = get_or_create_user(baseurl, usernames)    
+    #get user's username or create a new user based on username
+    user_id = get_or_create_user(baseurl)    
 
     # couldn't access username/couldn't insert user
     if not user_id:
        print('Error with user, please try again')
        sys.exit(1)
-
-    #
-    # main processing loop:
-    #
-
-
 
     #
     # done
