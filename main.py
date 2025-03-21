@@ -132,19 +132,36 @@ def web_service_get(url):
 def get_or_create_user(baseurl):
     try: 
         
+        # /usernames is called in main and passed in here as a list
         username = input("Enter your username: ")
         api = "/users"
         url = baseurl + api
-        res = web_service_get(url)
+
+        # prepare the data to send as JSON in POST body
+        data = {
+           "username": username
+        }
 
 
-        if username in users:
+        #POST req to add new user if they don't exist 
+        # and to retrieve data of user if they do
+        res = requests.post(url, json=data)
+        
+        if res.status_code == 200:
+           body = res.json()
+           message = body['message']
+           print(message)
+           return body['userid']
+        elif res.status_code == 500:
+           body = res.json()
+           message = body['message']
+           print(message)
+           return
+        else:
+           body = res.json()
+           print(body)
+           return
            
-
-
-
-
-
     except Exception as e:
         print("**ERROR")
         print("**ERROR: invalid input")
@@ -193,19 +210,14 @@ try:
     lastchar = baseurl[len(baseurl) - 1]
     if lastchar == "/":
         baseurl = baseurl[:-1]
-    
 
+    #get user's username or create a new user based on username
+    userid = get_or_create_user(baseurl)    
 
-    #get user's username 
-    username = get_or_create_user(baseurl)    
-
-
-    #
-    # main processing loop:
-    #
-
-
-
+    # couldn't access username/couldn't insert user
+    if not userid:
+       print('Error with user, please try again')
+       sys.exit(1)
 
     #
     # done
