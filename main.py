@@ -134,16 +134,25 @@ def get_or_create_user(baseurl, usernames):
         
         # /usernames is called in main and passed in here as a list
         username = input("Enter your username: ")
-
-        if username in usernames:
-           print('Welcome back {username}! Your user ID is {userid}')
+        api = "/users"
+        url = baseurl + api + f"?username={username}"
+        res = requests.get(url)
+        
+        if res.status_code == 200:
+           body = res.json()
+           message = body['message']
+           print(message)
+           return body['user_id']
+        elif res.status_code = 500:
+           body = res.json()
+           message = body['message']
+           print(message)
+           return
         else:
-           # add new user to DB
-           # query for userid
-           print('Hi, {username}: Your new user ID is {userid}')
-
+           body = res.json()
+           print(body)
+           return
            
-
     except Exception as e:
         print("**ERROR")
         print("**ERROR: invalid input")
@@ -202,13 +211,16 @@ try:
 
 
     #get user's username 
-    username = get_or_create_user(baseurl, usernames)    
+    user_id = get_or_create_user(baseurl, usernames)    
 
+    # couldn't access username/couldn't insert user
+    if not user_id:
+       print('Error with user, please try again')
+       sys.exit(1)
 
     #
     # main processing loop:
     #
-
 
 
 
