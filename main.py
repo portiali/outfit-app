@@ -145,13 +145,13 @@ def get_or_create_user(baseurl):
 
         #POST req to add new user if they don't exist 
         # and to retrieve data of user if they do
-        res = requests.get(url, json=data)
+        res = requests.post(url, json=data)
         
         if res.status_code == 200:
            body = res.json()
            message = body['message']
            print(message)
-           return body['user_id']
+           return body['userid']
         elif res.status_code == 500:
            body = res.json()
            message = body['message']
@@ -212,10 +212,10 @@ try:
         baseurl = baseurl[:-1]
 
     #get user's username or create a new user based on username
-    user_id = get_or_create_user(baseurl)    
+    userid = get_or_create_user(baseurl)    
 
     # couldn't access username/couldn't insert user
-    if not user_id:
+    if not userid:
        print('Error with user, please try again')
        sys.exit(1)
 

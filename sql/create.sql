@@ -45,18 +45,18 @@ CREATE TABLE clothingData
 );
 ALTER TABLE clothingData AUTO_INCREMENT = 2001;
 
-DROP USER IF EXISTS 'benfordapp-read-only';
-DROP USER IF EXISTS 'benfordapp-read-write';
+DROP USER IF EXISTS 'outfitapp-read-only';
+DROP USER IF EXISTS 'outfitapp-read-write';
 
 
-CREATE USER 'benfordapp-read-only' IDENTIFIED BY 'abc123!!';
-CREATE USER 'benfordapp-read-write' IDENTIFIED BY 'def456!!';
+CREATE USER 'outfitapp-read-only' IDENTIFIED BY 'abc123!!';
+CREATE USER 'outfitapp-read-write' IDENTIFIED BY 'def456!!';
 
 
 GRANT SELECT, SHOW VIEW ON outfitapp.* 
-      TO 'benfordapp-read-only';
+      TO 'outfitapp-read-only';
 GRANT SELECT, SHOW VIEW, INSERT, UPDATE, DELETE, DROP, CREATE, ALTER ON outfitapp.* 
-      TO 'benfordapp-read-write';
+      TO 'outfitapp-read-write';
       
 FLUSH PRIVILEGES;
 
