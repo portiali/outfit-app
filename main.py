@@ -92,6 +92,7 @@ def web_service_get(url):
   """
 
   try:
+    print('entered wsg')
     retries = 0
     
     while True:
@@ -180,7 +181,8 @@ def prompt():
     print(">> Enter a command:")
     print("   0 => end")
     print("   1 => upload closet")
-    print("   2 => get a fit!")
+    print("   2 => give me some quick recomendations")
+    print("   3 => get a 'fit!")
 
     cmd = input()
     if cmd == "":
@@ -280,13 +282,15 @@ def outfit(baseurl, userid):
   try:
 
     
-    #
-    # call the web service:
-    #
+      #
+      # call the web service:
+      #
     api = "/outfit"
-    url = baseurl + api + "/" + userid
+    url = baseurl + api + "/" + str(userid)
+    print('cur url:', url)
     res = web_service_get(url)
 
+    print("we got a response")
     #
     # let's look at what we got back:
     #
@@ -306,7 +310,7 @@ def outfit(baseurl, userid):
         print("Error message:", body)
       #
       return
-      
+    
     #
     # if we get here, status code was 200, so we
     # have results to deserialize and display:
@@ -314,11 +318,13 @@ def outfit(baseurl, userid):
     
     print("Outfit created! Creating a new folder now...")
     # deserialize the message body:
+    
     body = res.json()
+    # print("body here", body)
     message = body['message']
     outfit = body['outfit']
 
-    # Generate a unique folder name using UUID
+#     # Generate a unique folder name using UUID
     unique_folder_name = f"outfit_images_{uuid.uuid4()}"
 
     # Create the folder for storing images (if it doesn't already exist)
@@ -355,7 +361,7 @@ def outfit(baseurl, userid):
 
 
 
-############################################################
+# ############################################################
 #
 # upload
 #
@@ -409,9 +415,9 @@ def upload(baseurl, userid):
     print(">> What kind of clothing item is this?")
     print("   Type 1 for top")
     print("   Type 2 for bottoms")
-    print("   Type 3 for dress")
-    print("   Type 4 for shoes")
-    print("   Type 5 for accessory")
+    print("   Type 3 for shoes")
+    # print("   Type 4 for shoes")
+    # print("   Type 5 for accessory")
 
     selection = input().strip()
 
@@ -585,7 +591,78 @@ def upload(baseurl, userid):
     logging.error(e)
     return
   
+############################################################
+#
+# forecast
+#
+def forecast(baseurl, userid):
+  """
+  Prompts the user for a user id, and gives recommendations on 
+  clothing items to wear this week based on the weekly forecast.
 
+  Parameters
+  ----------
+  baseurl: baseurl for web service
+
+  Returns
+  -------
+  nothing
+  """
+  
+  try:
+
+    #
+    # call the web service:
+    #
+    api = "/forecast"
+    url = baseurl + api + "/" + str(userid)
+    res = web_service_get(url)
+
+    #
+    # let's look at what we got back:
+    #
+    if res.status_code == 200: #success
+      pass
+    else:
+      # failed:
+      print("Failed with status code:", res.status_code)
+      print("url: " + url)
+      if res.status_code == 500:
+        # we'll have an error message
+        body = res.json()
+        print("Error message:", body)
+      #
+      return
+      
+    #
+    # if we get here, status code was 200, so we
+    # have results to deserialize and display:
+    #
+    
+    print("Here's your weekly forecast:")
+    # deserialize the message body:
+    body = res.json()
+    message = body['message']
+    recs = body['body']
+
+    print(message)
+    print("Scanning your digital wardrobe...")
+
+    if not recs:
+       print("Please upload more items to get an accurate weekly forecast!")
+       return
+
+    print("Based on the weekly forecast, here are the items from your wardrobe that we recommend!")
+    for rec in recs:
+       print("   *" + rec)
+  
+    return
+
+  except Exception as e:
+    logging.error("**ERROR: forecast() failed:")
+    logging.error("url: " + url)
+    logging.error(e)
+    return
 
 
     
@@ -648,10 +725,12 @@ try:
         print("baseurl here: ", baseurl)
         upload(baseurl, userid)
       elif cmd == 2:
+        forecast(baseurl, userid)
+      elif cmd == 3:
         outfit(baseurl, userid)
+      
       else:
          print("** Unknown command, try again....")
-      
       cmd = prompt()
     #
     # done
