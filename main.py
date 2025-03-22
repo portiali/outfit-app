@@ -92,7 +92,7 @@ def web_service_get(url):
   """
 
   try:
-    print('entered wsg')
+    
     retries = 0
     
     while True:
@@ -287,10 +287,10 @@ def outfit(baseurl, userid):
       #
     api = "/outfit"
     url = baseurl + api + "/" + str(userid)
-    print('cur url:', url)
+    # print('cur url:', url)
     res = web_service_get(url)
 
-    print("we got a response")
+    # print("we got a response")
     #
     # let's look at what we got back:
     #
@@ -382,8 +382,7 @@ def upload(baseurl, userid):
   """
 
   try:
-    print("base url here: ", baseurl)
-    # print(f"Base URL: {baseurl}, API: {api}, User ID: {userid}, Final URL: {url}")
+   
     print("Enter jpeg filename>")
     # local_filename = input()
     local_filename = input()
@@ -416,8 +415,7 @@ def upload(baseurl, userid):
     print("   Type 1 for top")
     print("   Type 2 for bottoms")
     print("   Type 3 for shoes")
-    # print("   Type 4 for shoes")
-    # print("   Type 5 for accessory")
+   
 
     selection = input().strip()
 
@@ -550,8 +548,7 @@ def upload(baseurl, userid):
       print("URL is empty, cannot proceed with request.")
       return
 
-    # print(f"URL: {url}")
-    # print(f"Data: {data}")
+
 
     res = web_service_post(url, data)
     
@@ -571,7 +568,7 @@ def upload(baseurl, userid):
         # we'll have an error message
         body = res.json()
         print("Error message:", body)
-      #
+      
       return
 
     #
@@ -643,7 +640,7 @@ def forecast(baseurl, userid):
 
     # deserialize the message body:
     body = res.json()
-    print("BODY: ", body)
+   
     message = body['message']
     recs = body['body']
 
@@ -712,8 +709,7 @@ try:
 
     #get user's username or create a new user based on username
     userid = get_or_create_user(baseurl)
-    # print(userid)   
-    # print(baseurl)
+    
 
     # couldn't access username/couldn't insert user
     if not userid:
@@ -724,8 +720,6 @@ try:
     cmd = prompt()
     while cmd != 0:
       if cmd == 1:
-        print("in here!")
-        print("baseurl here: ", baseurl)
         upload(baseurl, userid)
       elif cmd == 2:
         forecast(baseurl, userid)
