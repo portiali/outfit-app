@@ -24,47 +24,6 @@ import time
 
 from configparser import ConfigParser
 
-
-# functions: 
-# outfit()
-#   returns outfit in a folder? -- resized and everything
-
-
-# upload()
-#   allows user to continously upload outfits to S3
-#   should call sagemaker-- server side probs
-#   also return a description of what sagemaker analyzed
-#   loop continously until user says no more clothes left to upload
-
-# weather()
-#   abstraction from user-- but should get the weather data from weather API
-#   makes clothing decisions accordingly
-
-
-# main:
-#   initial welcome prompt, ask for username, assign user id accordingly
-
-############################################################
-#
-# classes
-#
-class Data:
-
-  def __init__(self, row):
-    self.dataid = row[0]
-    self.clothingid = row[1]
-    self.gender = row[2]
-    self.category = row[3]
-    self.articleType = row[4]
-    self.color = row[5]
-    self.season = row[6]
-    self.usage = row[7]
-
-class User:
-   def __init__(self, row):
-      self.userid = row[0]
-      self.username = row[1]
-
 ###################################################################
 #
 # web_service_get
@@ -92,6 +51,7 @@ def web_service_get(url):
   """
 
   try:
+    
     retries = 0
     
     while True:
@@ -128,7 +88,19 @@ def web_service_get(url):
 #
 # get_or_create_user
 #
-
+"""
+  Checks if a user already exists through their unique username,
+  if so collect's their userid and keeps it in a variable,
+  if it is a new username then insert a new username and keep a userid
+  
+  Parameters
+  ----------
+  baseurl: url for calling the web service
+  
+  Returns
+  -------
+  response received from web service
+  """
 def get_or_create_user(baseurl):
     try: 
         
@@ -173,6 +145,13 @@ def get_or_create_user(baseurl):
 #
 # prompt
 # 
+"""
+  Simple prompt for options of this service
+  
+  Returns
+  -------
+  user's input
+  """
 
 def prompt():
   try:
@@ -180,7 +159,8 @@ def prompt():
     print(">> Enter a command:")
     print("   0 => end")
     print("   1 => upload closet")
-    print("   2 => get a fit!")
+    print("   2 => give me some quick recomendations")
+    print("   3 => get a 'fit!")
 
     cmd = input()
     if cmd == "":
@@ -217,6 +197,8 @@ def web_service_post(url, data):
   Parameters
   ----------
   url: url for calling the web service
+
+  data: actual data that is being posted
   
   Returns
   -------
@@ -264,13 +246,15 @@ def web_service_post(url, data):
 #
 def outfit(baseurl, userid):
   """
-  Prompts the user for a user id, and creates an outfit
+  Utilize's user's userid and creates an outfit
   for the user based on the current weather. Then returns
   the images in a folder to the user.
 
   Parameters
   ----------
   baseurl: baseurl for web service
+
+  userid: user's unique id
 
   Returns
   -------
@@ -280,13 +264,15 @@ def outfit(baseurl, userid):
   try:
 
     
-    #
-    # call the web service:
-    #
+      #
+      # call the web service:
+      #
     api = "/outfit"
-    url = baseurl + api + "/" + userid
+    url = baseurl + api + "/" + str(userid)
+    # print('cur url:', url)
     res = web_service_get(url)
 
+    # print("we got a response")
     #
     # let's look at what we got back:
     #
@@ -306,7 +292,7 @@ def outfit(baseurl, userid):
         print("Error message:", body)
       #
       return
-      
+    
     #
     # if we get here, status code was 200, so we
     # have results to deserialize and display:
@@ -314,11 +300,13 @@ def outfit(baseurl, userid):
     
     print("Outfit created! Creating a new folder now...")
     # deserialize the message body:
+    
     body = res.json()
+    # print("body here", body)
     message = body['message']
     outfit = body['outfit']
 
-    # Generate a unique folder name using UUID
+#     # Generate a unique folder name using UUID
     unique_folder_name = f"outfit_images_{uuid.uuid4()}"
 
     # Create the folder for storing images (if it doesn't already exist)
@@ -355,7 +343,7 @@ def outfit(baseurl, userid):
 
 
 
-############################################################
+# ############################################################
 #
 # upload
 #
@@ -370,14 +358,15 @@ def upload(baseurl, userid):
   ----------
   baseurl: baseurl for web service
 
+  userid: user's unique id
+
   Returns
   -------
   nothing
   """
 
   try:
-    print("base url here: ", baseurl)
-    # print(f"Base URL: {baseurl}, API: {api}, User ID: {userid}, Final URL: {url}")
+   
     print("Enter jpeg filename>")
     # local_filename = input()
     local_filename = input()
@@ -409,9 +398,8 @@ def upload(baseurl, userid):
     print(">> What kind of clothing item is this?")
     print("   Type 1 for top")
     print("   Type 2 for bottoms")
-    print("   Type 3 for dress")
-    print("   Type 4 for shoes")
-    print("   Type 5 for accessory")
+    print("   Type 3 for shoes")
+   
 
     selection = input().strip()
 
@@ -539,13 +527,14 @@ def upload(baseurl, userid):
     #
     api = '/item'
     url = baseurl + api + "/" + str(userid)
-    print("url here: ", url)
+
+    # print("url here: ", url)
+
     if not url:
       print("URL is empty, cannot proceed with request.")
       return
 
-    # print(f"URL: {url}")
-    # print(f"Data: {data}")
+
 
     res = web_service_post(url, data)
     
@@ -565,7 +554,7 @@ def upload(baseurl, userid):
         # we'll have an error message
         body = res.json()
         print("Error message:", body)
-      #
+      
       return
 
     #
@@ -585,7 +574,83 @@ def upload(baseurl, userid):
     logging.error(e)
     return
   
+############################################################
+#
+# forecast
+#
+def forecast(baseurl, userid):
+  """
+  Prompts the user for a user id, and gives recommendations on 
+  clothing items to wear this week based on the weekly forecast.
 
+  Parameters
+  ----------
+  baseurl: baseurl for web service
+
+  userid: user's unique id
+
+  Returns
+  -------
+  nothing
+  """
+  
+  try:
+
+    #
+    # call the web service:
+    #
+    api = "/forecast"
+    url = baseurl + api + "/" + str(userid)
+    res = web_service_get(url)
+
+    #
+    # let's look at what we got back:
+    #
+    if res.status_code == 200: #success
+      pass
+    else:
+      # failed:
+      print("Failed with status code:", res.status_code)
+      print("url: " + url)
+      if res.status_code == 500:
+        # we'll have an error message
+        body = res.json()
+        print("Error message:", body)
+      #
+      return
+      
+    #
+    # if we get here, status code was 200, so we
+    # have results to deserialize and display:
+    #
+    
+    print("Here's your weekly forecast:")
+
+    # deserialize the message body:
+    body = res.json()
+   
+    message = body['message']
+    recs = body['body']
+
+    print(message)
+    print("Scanning your digital wardrobe...")
+
+
+    if not recs:
+       print("Please upload more items to get an accurate weekly forecast!")
+       return
+
+    print("Based on the weekly forecast, here are the items from your wardrobe that we recommend!")
+    for rec in recs:
+       print("   *" + rec)
+  
+    return
+
+  except Exception as e:
+    logging.error("**ERROR: forecast() failed:")
+    logging.error("url: " + url)
+    logging.error(e)
+    return
 
 
     
@@ -632,8 +697,7 @@ try:
 
     #get user's username or create a new user based on username
     userid = get_or_create_user(baseurl)
-    # print(userid)   
-    # print(baseurl)
+    
 
     # couldn't access username/couldn't insert user
     if not userid:
@@ -644,14 +708,14 @@ try:
     cmd = prompt()
     while cmd != 0:
       if cmd == 1:
-        print("in here!")
-        print("baseurl here: ", baseurl)
         upload(baseurl, userid)
       elif cmd == 2:
+        forecast(baseurl, userid)
+      elif cmd == 3:
         outfit(baseurl, userid)
+      
       else:
          print("** Unknown command, try again....")
-      
       cmd = prompt()
     #
     # done
