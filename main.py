@@ -527,7 +527,9 @@ def upload(baseurl, userid):
     #
     api = '/item'
     url = baseurl + api + "/" + str(userid)
-    print("url here: ", url)
+
+    # print("url here: ", url)
+
     if not url:
       print("URL is empty, cannot proceed with request.")
       return
