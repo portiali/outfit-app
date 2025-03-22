@@ -24,47 +24,6 @@ import time
 
 from configparser import ConfigParser
 
-
-# functions: 
-# outfit()
-#   returns outfit in a folder? -- resized and everything
-
-
-# upload()
-#   allows user to continously upload outfits to S3
-#   should call sagemaker-- server side probs
-#   also return a description of what sagemaker analyzed
-#   loop continously until user says no more clothes left to upload
-
-# weather()
-#   abstraction from user-- but should get the weather data from weather API
-#   makes clothing decisions accordingly
-
-
-# main:
-#   initial welcome prompt, ask for username, assign user id accordingly
-
-############################################################
-#
-# classes
-#
-class Data:
-
-  def __init__(self, row):
-    self.dataid = row[0]
-    self.clothingid = row[1]
-    self.gender = row[2]
-    self.category = row[3]
-    self.articleType = row[4]
-    self.color = row[5]
-    self.season = row[6]
-    self.usage = row[7]
-
-class User:
-   def __init__(self, row):
-      self.userid = row[0]
-      self.username = row[1]
-
 ###################################################################
 #
 # web_service_get
@@ -129,7 +88,19 @@ def web_service_get(url):
 #
 # get_or_create_user
 #
-
+"""
+  Checks if a user already exists through their unique username,
+  if so collect's their userid and keeps it in a variable,
+  if it is a new username then insert a new username and keep a userid
+  
+  Parameters
+  ----------
+  baseurl: url for calling the web service
+  
+  Returns
+  -------
+  response received from web service
+  """
 def get_or_create_user(baseurl):
     try: 
         
@@ -174,6 +145,13 @@ def get_or_create_user(baseurl):
 #
 # prompt
 # 
+"""
+  Simple prompt for options of this service
+  
+  Returns
+  -------
+  user's input
+  """
 
 def prompt():
   try:
@@ -219,6 +197,8 @@ def web_service_post(url, data):
   Parameters
   ----------
   url: url for calling the web service
+
+  data: actual data that is being posted
   
   Returns
   -------
@@ -266,13 +246,15 @@ def web_service_post(url, data):
 #
 def outfit(baseurl, userid):
   """
-  Prompts the user for a user id, and creates an outfit
+  Utilize's user's userid and creates an outfit
   for the user based on the current weather. Then returns
   the images in a folder to the user.
 
   Parameters
   ----------
   baseurl: baseurl for web service
+
+  userid: user's unique id
 
   Returns
   -------
@@ -375,6 +357,8 @@ def upload(baseurl, userid):
   Parameters
   ----------
   baseurl: baseurl for web service
+
+  userid: user's unique id
 
   Returns
   -------
@@ -600,6 +584,8 @@ def forecast(baseurl, userid):
   Parameters
   ----------
   baseurl: baseurl for web service
+
+  userid: user's unique id
 
   Returns
   -------
