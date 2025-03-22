@@ -640,13 +640,16 @@ def forecast(baseurl, userid):
     #
     
     print("Here's your weekly forecast:")
+
     # deserialize the message body:
     body = res.json()
+    print("BODY: ", body)
     message = body['message']
     recs = body['body']
 
     print(message)
     print("Scanning your digital wardrobe...")
+
 
     if not recs:
        print("Please upload more items to get an accurate weekly forecast!")
